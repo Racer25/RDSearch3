@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="entities\NumberPublicationsForOneYear.cs" />
     <Compile Include="repositories\ConfigRepository.cs" />
     <Compile Include="entities\Config.cs" />
     <Compile Include="entities\Disease.cs" />

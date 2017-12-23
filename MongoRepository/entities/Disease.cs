@@ -52,11 +52,14 @@ namespace MongoRepository.entities
 
         public List<Symptom> symptoms { get; set; }
 
+        public List<NumberPublicationsForOneYear> NumberPublicationsPerYear { get; set; }
+
         public Disease()
         {
             symptoms = new List<Symptom>();
             Synonyms = new List<string>();
             TextualInformationList = new List<TextualInformation>();
+            NumberPublicationsPerYear = new List<NumberPublicationsForOneYear>();
         }
 
     }

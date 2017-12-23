@@ -24,10 +24,12 @@ namespace WebCrawler
         public string confAPI { get; set; }
 
         private MongoRepository.PublicationRepository publicationRepository;
+        private MongoRepository.DiseaseRepository diseaseRepository;
 
         public PubmedEngine()
         {
             publicationRepository = new MongoRepository.PublicationRepository();
+            diseaseRepository = new MongoRepository.DiseaseRepository();
             Publications = new ConcurrentBag<Publication>();
             confAPI = "&api_key=5ed9a0500dd91e18d27009f9e7160d7a7008&tool=RDSearch&email=charles.cousyn1@uqac.ca";
             //myRateLimiter.LaunchRequests();
@@ -63,8 +65,7 @@ namespace WebCrawler
 
             return result;
         }
-
-        //Recursive function
+        
         //public Task PubmedCrawlerFetch(string webDev, long retstart, int queryKey, int maxBatch, Disease disease)
         public Task PubmedCrawlerFetch(long retstart, int maxBatch, Disease disease, List<long> idList)
         {
@@ -189,6 +190,89 @@ namespace WebCrawler
                 }
             );
                 
+        }
+
+        public Task PubmedCrawlerSummary(long retstart, int maxBatch, Disease disease, List<long> idList)
+        {
+            return new Task(() =>
+            {
+                var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
+
+                //Constructing parameters ids
+                string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id=" + idList.ElementAt(0).ToString();
+
+                for (int i = 1; i < idList.Count; i++)
+                {
+                    parameters += "," + idList.ElementAt(i);
+                }
+
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Timeout = (int)TimeSpan.FromMinutes(10).TotalMilliseconds;
+                request.AutomaticDecompression = DecompressionMethods.GZip;
+
+
+                var data = Encoding.ASCII.GetBytes(parameters);
+                request.ContentLength = data.Length;
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                //Console.WriteLine("Starting request for PubMed Fetch this can take some time...");
+
+                XmlSerializer serializer = new XmlSerializer(typeof(eSummaryResult));
+                eSummaryResult results;
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var stream = response.GetResponseStream())
+                using (var readerString = new StreamReader(stream, Encoding.UTF8))
+                //using (var reader = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+                {
+
+                    string resString = readerString.ReadToEnd();
+                    try
+                    {
+
+                        Disease dis = diseaseRepository.getByOrphaNumber(disease.OrphaNumber);
+
+                        //Console.WriteLine("Parsing request for PubMed Fetch this can take some time...");
+                        results = serializer.Deserialize(new StringReader(resString)) as eSummaryResult;
+                        foreach(var documentSummary in results.Items[0].DocumentSummary)
+                        {
+                            string yearString = documentSummary.PubDate.Substring(0, 4);
+
+                            int n;
+                            bool isNumeric = int.TryParse(yearString, out n);
+                            if(isNumeric)
+                            {
+                                int indexOfYear = dis.NumberPublicationsPerYear.Select(x => x.year).ToList().IndexOf(yearString);
+                                if (indexOfYear != -1)
+                                {
+                                    dis.NumberPublicationsPerYear[indexOfYear].numberOfPublications++;
+                                }
+                                else
+                                {
+                                    NumberPublicationsForOneYear one = new NumberPublicationsForOneYear();
+                                    one.year = yearString;
+                                    one.numberOfPublications = 1;
+                                    dis.NumberPublicationsPerYear.Add(one);
+                                }
+                            }
+                        }
+
+                        diseaseRepository.updateDisease(dis);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error on disease: " + disease.Name + ", orphaNumber: " + disease.OrphaNumber);
+                        Console.WriteLine(resString);
+                    }
+                }
+            }
+            );
         }
 
         private List<Publication> ConvertFromPubmedArticleSetToPublications(PubmedArticleSet pubmedArticleSet, Disease disease)
