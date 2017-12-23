@@ -1,0 +1,63 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MongoDB.Bson;
+
+namespace MongoRepository.entities
+{
+    public class Disease
+    {
+        public ObjectId _id { get; set; }
+
+        public string Name { get; set; }
+
+        public string OrphaNumber { get; set; }
+
+        public List<string> Synonyms { get; set; }
+
+        public List<TextualInformation> TextualInformationList { get; set; }
+
+        #region EXPERT VALUES
+
+        public string Prevalence { get; set; }
+
+        public string Inheritance { get; set; }
+
+        public List<string> AgesOnSet { get; set; }
+
+        public string OMIMID { get; set; }
+
+        public string OMIMUrl { get; set; }
+
+        public string ICDTen { get; set; }
+
+        public string UMLS { get; set; }
+
+        public string MeSH { get; set; }
+
+        public string GARD { get; set; }
+
+        public string MedDRA { get; set; }
+
+        public string Epidemiology { get; set; }
+
+        public string ClinicalDescription { get; set; }
+
+        public string Etiology { get; set; }
+
+        public string GeneticCounseling { get; set; }
+        #endregion
+
+        public List<Symptom> symptoms { get; set; }
+
+        public Disease()
+        {
+            symptoms = new List<Symptom>();
+            Synonyms = new List<string>();
+            TextualInformationList = new List<TextualInformation>();
+        }
+
+    }
+}
