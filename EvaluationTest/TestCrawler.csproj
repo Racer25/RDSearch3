@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CrawlerOrphanet\WebCrawler.csproj" />
     <ProjectReference Include="..\Evaluation\Evaluation.csproj" />
   </ItemGroup>
 

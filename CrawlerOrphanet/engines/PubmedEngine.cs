@@ -1,6 +1,4 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -387,51 +385,85 @@ namespace WebCrawler
             return lst_Publications;
         }
 
-        private List<Publication> ConvertFromPubmedArticleSetToPublications2(Pmcarticleset pmcArticleSet, Disease disease)
+        public List<Publication> ConvertFromPubmedArticleSetToPublications2(Pmcarticleset pmcArticleSet, Disease disease)
         {
-            throw new NotImplementedException();
-            /*
+            //throw new NotImplementedException();
+            
             List<Publication> lst_Publications = new List<Publication>();
-            if (pubmedArticleSet != null && pubmedArticleSet.PubmedArticle != null)
+            if (pmcArticleSet != null && pmcArticleSet.Article != null)
             {
-                foreach (var article in pubmedArticleSet.PubmedArticle)
+                foreach (var article in pmcArticleSet.Article)
                 {
                     Publication publication = new Publication();
-                    publication.title = article.MedlineCitation.Article.ArticleTitle;
-                    publication.idPubmed = article.MedlineCitation.PMID.Value;
 
-                    if (article.MedlineCitation.Article.AuthorList != null)
+                    //Title and ids
+                    publication.title = article.Front.Articlemeta.Titlegroup.Articletitle;
+                    publication.idPubmed = Convert.ToInt64(article.Front.Articlemeta.Articleid.Where(x => x.Pubidtype == "pmid").FirstOrDefault().Text);
+                    publication.idPMC = Convert.ToInt64(article.Front.Articlemeta.Articleid.Where(x => x.Pubidtype == "pmc").FirstOrDefault().Text);
+                    publication.doi = article.Front.Articlemeta.Articleid.Where(x => x.Pubidtype == "doi").FirstOrDefault().Text;
+
+                    //Authors
+                    var authorsSet = article.Front.Articlemeta.Contribgroup.Contrib.Where(x => x.Contribtype == "author").ToList();
+                    if (authorsSet != null)
                     {
-                        foreach (var author in article.MedlineCitation.Article.AuthorList.Author)
+                        foreach (var author in authorsSet)
                         {
-                            publication.authors.Add(author?.ForeName + " " + author?.LastName);
+                            publication.authors.Add(author?.Name?.Givennames + " " + author?.Name?.Surname);
                         }
                     }
 
-
-                    var abstractE = article.MedlineCitation.Article.Abstract;
+                    //Abstract
+                    var abstractE = article.Front.Articlemeta.Abstract;
 
                     if (abstractE != null)
                     {
-                        foreach (var section in abstractE.AbstractText)
+                        foreach (var part in abstractE)
                         {
-                            publication.abstractText += section?.Label + " " + section?.Value + " ";
+                            foreach (var test in part.P)
+                            {
+                                publication.abstractText += test.Text;
+                            }
                         }
                     }
 
-
-                    if (article.MedlineCitation.DateCreated != null)
+                    //Date
+                    var articleDate = article.Front.Articlemeta.Pubdate.Where(x => x.Pubtype == "ppub").FirstOrDefault();
+                    if (articleDate != null)
                     {
-                        publication.datePublication = new DateTime(article.MedlineCitation.DateCreated.Year, article.MedlineCitation.DateCreated.Month, article.MedlineCitation.DateCreated.Day);
+                        publication.datePublication = new DateTime(int.Parse(articleDate.Year), int.Parse(articleDate.Month), int.Parse(articleDate.Day));
                     }
                     publication.timesCited = 0;
 
                     publication.orphaNumberOfLinkedDisease = disease.OrphaNumber;
 
                     lst_Publications.Add(publication);
+
+                    //Full text
+                    var sectionFullText = article.Body.Sec;
+
+                    if (sectionFullText != null)
+                    {
+                        foreach (var section in sectionFullText)
+                        {
+                            publication.fullText += section.Title + " ";
+                            foreach (var paragraphe in section.P)
+                            {
+                                publication.fullText += paragraphe.Text + " ";
+                            }
+
+                            foreach (var paragraphe in section.sec)
+                            {
+                                publication.fullText += paragraphe.Title + " ";
+                                foreach (var p in paragraphe.P)
+                                {
+                                    publication.fullText += p.Text + " ";
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            return lst_Publications;*/
+            return lst_Publications;
         }
 
         public void Start(List<Disease> lst_diseases)

@@ -13,9 +13,15 @@ namespace MongoRepository.entities
 
         public long idPubmed { get; set; }
 
+        public long idPMC { get; set; }
+
+        public string doi { get; set; }
+
         public String title { get; set; }
 
         public String abstractText { get; set; }
+
+        public String fullText { get; set; }
 
         public DateTime datePublication { get; set; }
 

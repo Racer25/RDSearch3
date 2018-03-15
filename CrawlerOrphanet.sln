@@ -11,9 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SymptomsEval", "SymptomsEva
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Evaluation", "Evaluation\Evaluation.csproj", "{B85C0AAE-EB70-4581-BC02-B3FC015A4B1A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvaluationTest", "EvaluationTest\EvaluationTest.csproj", "{B29F1642-286D-4E78-A456-2973D6B93BC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCrawler", "EvaluationTest\TestCrawler.csproj", "{B29F1642-286D-4E78-A456-2973D6B93BC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigurationJSON", "ConfigurationJSON\ConfigurationJSON.csproj", "{4ACD2FF1-CD63-4E02-A885-471DC38E66AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationJSON", "ConfigurationJSON\ConfigurationJSON.csproj", "{4ACD2FF1-CD63-4E02-A885-471DC38E66AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{99EC9756-55C5-4E6A-B7F6-CB143AE082DB}"
 	ProjectSection(SolutionItems) = preProject
