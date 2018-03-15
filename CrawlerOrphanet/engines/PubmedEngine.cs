@@ -14,6 +14,7 @@ using MongoRepository.entities;
 using System.Threading;
 using System.Text;
 using CrawlerOrphanet.tools;
+using WebCrawler2;
 
 namespace WebCrawler
 {
@@ -114,6 +115,72 @@ namespace WebCrawler
                         //results = serializer.Deserialize(reader) as PubmedArticleSet;
                         //Into db
                         List<Publication> lst_publications = ConvertFromPubmedArticleSetToPublications(results, disease);
+                        if (lst_publications.Count != 0)
+                        {
+                            publicationRepository.insertListLessFast(lst_publications);
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error on disease: " + disease.Name + ", orphaNumber: " + disease.OrphaNumber);
+                        Console.WriteLine(resString);
+                    }
+                }
+            }
+            );
+        }
+
+        //Recursive function
+        //public Task PubmedCrawlerFetch(string webDev, long retstart, int queryKey, int maxBatch, Disease disease)
+        public Task PubmedCrawlerFetch2(long retstart, int maxBatch, Disease disease, List<long> idList)
+        {
+            return new Task(() =>
+            {
+                //var url = $"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&WebEnv={webDev}&query_key={queryKey}&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}";
+                var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
+
+                //Constructing parameters ids
+                string parameters = $"db=pmc&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id=" + idList.ElementAt(0).ToString();
+                //string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}{confAPI}&id=" + idList.ElementAt(0).ToString();
+                for (int i = 1; i < idList.Count; i++)
+                {
+                    parameters += "," + idList.ElementAt(i);
+                }
+
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Timeout = (int)TimeSpan.FromMinutes(10).TotalMilliseconds;
+                request.AutomaticDecompression = DecompressionMethods.GZip;
+
+
+                var data = Encoding.ASCII.GetBytes(parameters);
+                request.ContentLength = data.Length;
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                //Console.WriteLine("Starting request for PubMed Fetch this can take some time...");
+
+                XmlSerializer serializer = new XmlSerializer(typeof(Pmcarticleset));
+                Pmcarticleset results;
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var stream = response.GetResponseStream())
+                using (var readerString = new StreamReader(stream, Encoding.UTF8))
+                //using (var reader = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+                {
+
+                    string resString = readerString.ReadToEnd();
+                    try
+                    {
+                        //Console.WriteLine("Parsing request for PubMed Fetch this can take some time...");
+                        results = serializer.Deserialize(new StringReader(resString)) as Pmcarticleset;
+                        //results = serializer.Deserialize(reader) as PubmedArticleSet;
+                        //Into db
+                        List<Publication> lst_publications = ConvertFromPubmedArticleSetToPublications2(results, disease);
                         if (lst_publications.Count != 0)
                         {
                             publicationRepository.insertListLessFast(lst_publications);
@@ -234,6 +301,53 @@ namespace WebCrawler
                 }
             }
             return lst_Publications;
+        }
+
+        private List<Publication> ConvertFromPubmedArticleSetToPublications2(Pmcarticleset pmcArticleSet, Disease disease)
+        {
+            throw new NotImplementedException();
+            /*
+            List<Publication> lst_Publications = new List<Publication>();
+            if (pubmedArticleSet != null && pubmedArticleSet.PubmedArticle != null)
+            {
+                foreach (var article in pubmedArticleSet.PubmedArticle)
+                {
+                    Publication publication = new Publication();
+                    publication.title = article.MedlineCitation.Article.ArticleTitle;
+                    publication.idPubmed = article.MedlineCitation.PMID.Value;
+
+                    if (article.MedlineCitation.Article.AuthorList != null)
+                    {
+                        foreach (var author in article.MedlineCitation.Article.AuthorList.Author)
+                        {
+                            publication.authors.Add(author?.ForeName + " " + author?.LastName);
+                        }
+                    }
+
+
+                    var abstractE = article.MedlineCitation.Article.Abstract;
+
+                    if (abstractE != null)
+                    {
+                        foreach (var section in abstractE.AbstractText)
+                        {
+                            publication.abstractText += section?.Label + " " + section?.Value + " ";
+                        }
+                    }
+
+
+                    if (article.MedlineCitation.DateCreated != null)
+                    {
+                        publication.datePublication = new DateTime(article.MedlineCitation.DateCreated.Year, article.MedlineCitation.DateCreated.Month, article.MedlineCitation.DateCreated.Day);
+                    }
+                    publication.timesCited = 0;
+
+                    publication.orphaNumberOfLinkedDisease = disease.OrphaNumber;
+
+                    lst_Publications.Add(publication);
+                }
+            }
+            return lst_Publications;*/
         }
 
         public void Start(List<Disease> lst_diseases)
