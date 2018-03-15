@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Evaluation
+namespace MongoRepository.entities
 {
     public class RelatedEntities
     {

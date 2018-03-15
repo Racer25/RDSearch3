@@ -144,7 +144,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="entities\DiseaseData.cs" />
+    <Compile Include="entities\DiseasesData.cs" />
     <Compile Include="entities\NumberPublicationsForOneYear.cs" />
+    <Compile Include="entities\RelatedEntities.cs" />
+    <Compile Include="entities\RelatedEntity.cs" />
+    <Compile Include="entities\Type.cs" />
     <Compile Include="repositories\ConfigRepository.cs" />
     <Compile Include="entities\Config.cs" />
     <Compile Include="entities\Disease.cs" />

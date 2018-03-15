@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Configuration;
 using ConfigurationJSON;
+using MongoRepository.entities;
 
 namespace Evaluation
 {

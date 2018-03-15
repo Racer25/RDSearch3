@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ConfigurationJSON\ConfigurationJSON.csproj" />
+    <ProjectReference Include="..\MongoRepository\MongoRepository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

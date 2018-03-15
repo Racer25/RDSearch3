@@ -13,14 +13,14 @@ using System.Threading;
 using System.Text;
 using CrawlerOrphanet.tools;
 using WebCrawler2;
+using ConfigurationJSON;
 
 namespace WebCrawler
 {
     public class PubmedEngine
     {
         public ConcurrentBag<Publication> Publications { get; set; }
-
-        public string confAPI { get; set; }
+        
 
         private MongoRepository.PublicationRepository publicationRepository;
         private MongoRepository.DiseaseRepository diseaseRepository;
@@ -30,14 +30,13 @@ namespace WebCrawler
             publicationRepository = new MongoRepository.PublicationRepository();
             diseaseRepository = new MongoRepository.DiseaseRepository();
             Publications = new ConcurrentBag<Publication>();
-            confAPI = "&api_key=5ed9a0500dd91e18d27009f9e7160d7a7008&tool=RDSearch&email=charles.cousyn1@uqac.ca";
             //myRateLimiter.LaunchRequests();
         }
 
         public eSearchResult PubmedCrawlerSearch(Disease disease)
         {
             var term = disease.Name + " AND hasabstract[text] AND Humans[Mesh]";
-            var url = $"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={term}&sort=relevance&retmax=1000&usehistory=y{confAPI}";
+            var url = $"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={term}&sort=relevance&retmax=1000&usehistory=y{ConfigurationManager.GetSetting("ParametersAPI")}";
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Timeout = (int)TimeSpan.FromMinutes(10).TotalMilliseconds;
             request.AutomaticDecompression = DecompressionMethods.GZip;
@@ -74,7 +73,8 @@ namespace WebCrawler
                 var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
 
                 //Constructing parameters ids
-                string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id=" + idList.ElementAt(0).ToString();
+                string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml" +
+                $"{ConfigurationManager.GetSetting("ParametersAPI")}&id=" + idList.ElementAt(0).ToString();
                 //string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}{confAPI}&id=" + idList.ElementAt(0).ToString();
                 for(int i = 1; i< idList.Count; i++)
                 {
@@ -140,7 +140,8 @@ namespace WebCrawler
                 var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
 
                 //Constructing parameters ids
-                string parameters = $"db=pmc&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id=" + idList.ElementAt(0).ToString();
+                string parameters = $"db=pmc&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml" +
+                $"{ConfigurationManager.GetSetting("ParametersAPI")}&id=" + idList.ElementAt(0).ToString();
                 //string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}{confAPI}&id=" + idList.ElementAt(0).ToString();
                 for (int i = 1; i < idList.Count; i++)
                 {
@@ -205,7 +206,8 @@ namespace WebCrawler
                         return;
                     }
                     var parameters = $"dbfrom=pubmed&linkname=pubmed_pubmed_citedin" +
-                    $"&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id={+idList.ElementAt(0)}";
+                    $"&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml" +
+                    $"{ConfigurationManager.GetSetting("ParametersAPI")}&id={+idList.ElementAt(0)}";
 
                     for (int i = 1; i < idList.Count; i++)
                     {
@@ -264,7 +266,8 @@ namespace WebCrawler
                 var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
 
                 //Constructing parameters ids
-                string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml{confAPI}&id=" + idList.ElementAt(0).ToString();
+                string parameters = $"db=pubmed&retstart={retstart}&retmax={maxBatch}&rettype=xml&retmode=xml" +
+                $"{ConfigurationManager.GetSetting("ParametersAPI")}&id=" + idList.ElementAt(0).ToString();
 
                 for (int i = 1; i < idList.Count; i++)
                 {

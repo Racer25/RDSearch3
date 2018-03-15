@@ -11,27 +11,20 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using MongoRepository.entities;
+using ConfigurationJSON;
 
 namespace WebCrawler
 {
     public class OrphaEngine
     {
-        public string OrphaURL { get; set; }
-
         public OrphaData Datas { get; set; }
 
         public ConcurrentBag<Disease> Diseases { get; set; }
 
-        public DateTime lastUpdateDateFromURL { get; set; }
+        public DateTime LastUpdateDateFromURL { get; set; }
 
-        public OrphaEngine(string orphaUrl)
+        public OrphaEngine()
         {
-            if (orphaUrl == null || orphaUrl == "")
-            {
-                throw new ArgumentNullException(nameof(orphaUrl));
-            }
-
-            OrphaURL = orphaUrl;
             Diseases = new ConcurrentBag<Disease>();
         }
 
@@ -41,6 +34,7 @@ namespace WebCrawler
             stopWatch.Start();
 
             GetRareDiseases();
+            SaveDiseasesOnDB();
             /*
             Disease test;
             bool tryTest = Diseases.TryPeek(out test);
@@ -49,7 +43,7 @@ namespace WebCrawler
                 var searchResult = PubMedCrawlerSearch(test.Name);
                 PubMedCrawler(searchResult.WebEnv, searchResult.Count, searchResult.QueryKey, (int)searchResult.Count);
             }*/
-            
+
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
@@ -183,7 +177,7 @@ namespace WebCrawler
 
         private void GetRareDiseases()
         {
-            var request = (HttpWebRequest)WebRequest.Create(OrphaURL);
+            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_Rare_Diseases"));
             request.AutomaticDecompression = DecompressionMethods.GZip;
 
             using (var response = (HttpWebResponse)request.GetResponse())
@@ -195,7 +189,7 @@ namespace WebCrawler
                 
                 var disorders = Datas.JDBOR[0].DisorderList[0].Disorder;
 
-                LaunchBatchs(disorders, 0, 150);
+                LaunchBatchs(disorders, 0, ConfigurationManager.GetSetting("BatchSizeDiseases"));
 
                 Console.WriteLine("I found {0} diseases", Diseases.Count);
             }
@@ -203,7 +197,7 @@ namespace WebCrawler
 
         public void GetLastUpdateDateFromURL()
         {
-            var request = (HttpWebRequest)WebRequest.Create(OrphaURL);
+            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_Rare_Diseases"));
             request.AutomaticDecompression = DecompressionMethods.GZip;
 
             using (var response = (HttpWebResponse)request.GetResponse())
@@ -213,9 +207,9 @@ namespace WebCrawler
                 //Console.WriteLine("Parsing request this can take some time...");
                 Datas = JsonConvert.DeserializeObject<OrphaData>(reader.ReadToEnd());
 
-                lastUpdateDateFromURL = DateTime.ParseExact(Datas.JDBOR[0].date, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                LastUpdateDateFromURL = DateTime.ParseExact(Datas.JDBOR[0].date, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
 
-                Console.WriteLine("Last update from url is: "+ lastUpdateDateFromURL);
+                Console.WriteLine("Last update from url is: "+ LastUpdateDateFromURL);
             }
         }
 
@@ -296,6 +290,38 @@ namespace WebCrawler
             });
 
             LaunchBatchs(disorders, indexDisorder + maxSize, maxSize);
+        }
+
+        public void SaveDiseasesOnDB()
+        {
+            using (var configRepository = new MongoRepository.ConfigRepository())
+            using (var diseaseRepository = new MongoRepository.DiseaseRepository())
+            {
+                if (configRepository.selectConfig() == null || LastUpdateDateFromURL > configRepository.selectConfig()?.lastUpdateDateOfDiseasesList)
+                {
+                    //We clear the collection
+                    diseaseRepository.removeAll();
+
+                    Console.WriteLine("Starting request for OrphaData/Orphanet this can take some time...");
+                    Console.WriteLine("Saving diseases information...");
+
+                    var lst_diseases = Diseases.ToList();
+
+                    //We stock the retrieved diseases in DB
+                    diseaseRepository.insertList(lst_diseases);
+
+                    //Update update date
+                    configRepository.deleteAll();
+                    MongoRepository.entities.Config conf = new MongoRepository.entities.Config();
+                    conf.lastUpdateDateOfDiseasesList = LastUpdateDateFromURL;
+                    configRepository.insert(conf);
+                }
+                else
+                {
+                    Console.WriteLine("Last update date from DB is: " + configRepository.selectConfig()?.lastUpdateDateOfDiseasesList);
+                    Console.WriteLine("No update detected, using offline disease information only");
+                }
+            }
         }
 
             public void Stop()

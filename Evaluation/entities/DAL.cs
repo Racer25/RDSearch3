@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoRepository.entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

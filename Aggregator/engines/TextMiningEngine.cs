@@ -15,19 +15,18 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections;
 using CrawlerOrphanet.tools;
+using ConfigurationJSON;
 
 namespace CrawlerOrphanet
 {
     class TextMiningEngine
     {
-        private string urlSymptomsList;//default=http://purl.obolibrary.org/obo/hp.obo
         private List<Symptom> symptomsList;
 
-        public TextMiningEngine(string urlSymptoms)
+        public TextMiningEngine()
         {
             Console.WriteLine("TextMiningEngine initialization ...");
             symptomsList = new List<Symptom>();
-            urlSymptomsList = urlSymptoms;
             getSymptomsList();
             //getSymptomsListBeta();
             Console.WriteLine("TextMiningEngine initialization finished");
@@ -59,7 +58,7 @@ namespace CrawlerOrphanet
 
             foreach (Publication publication in publications)
             {
-                string text = publication.title + " " + publication.abstractText;
+                string text = publication.title + " " + publication.abstractText + " "+publication.fullText;
 
                 //Text preprocessing
                 text = text.ToLower();
@@ -136,7 +135,7 @@ namespace CrawlerOrphanet
         {
             Console.WriteLine("Retriveing symptomsNamesList ...");
 
-            var request = (HttpWebRequest)WebRequest.Create(urlSymptomsList);
+            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_SymptomsList"));
             request.AutomaticDecompression = DecompressionMethods.GZip;
 
             Console.WriteLine("Starting request for HPO this can take some time...");

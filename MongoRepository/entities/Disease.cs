@@ -51,6 +51,41 @@ namespace MongoRepository.entities
         #endregion
 
         public List<Symptom> symptoms { get; set; }
+        public int NumberOfPublications { get; set; }
+
+        public Disease(string OrphaNumberP, string NameP)
+        {
+            symptoms = new List<Symptom>();
+            Synonyms = new List<string>();
+            TextualInformationList = new List<TextualInformation>();
+            NumberPublicationsPerYear = new List<NumberPublicationsForOneYear>();
+            OrphaNumber = OrphaNumberP;
+            Name = NameP;
+            Synonyms = new List<string>();
+        }
+
+        public Disease(string OrphaNumberP, string NameP, int NumberOfPublicationsP)
+        {
+            symptoms = new List<Symptom>();
+            Synonyms = new List<string>();
+            TextualInformationList = new List<TextualInformation>();
+            NumberPublicationsPerYear = new List<NumberPublicationsForOneYear>();
+            OrphaNumber = OrphaNumberP;
+            Name = NameP;
+            Synonyms = new List<string>();
+            NumberOfPublications = NumberOfPublicationsP;
+        }
+
+        public Disease(string OrphaNumberP, string NameP, List<string> SynonymsP)
+        {
+            symptoms = new List<Symptom>();
+            Synonyms = new List<string>();
+            TextualInformationList = new List<TextualInformation>();
+            NumberPublicationsPerYear = new List<NumberPublicationsForOneYear>();
+            OrphaNumber = OrphaNumberP;
+            Name = NameP;
+            Synonyms = SynonymsP;
+        }
 
         public List<NumberPublicationsForOneYear> NumberPublicationsPerYear { get; set; }
 

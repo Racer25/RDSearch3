@@ -1,8 +1,9 @@
-﻿using System;
+﻿using MongoRepository.entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Evaluation
+namespace MongoRepository.entities
 {
     public class DiseaseData
     {
