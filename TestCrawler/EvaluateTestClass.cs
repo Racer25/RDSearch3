@@ -22,59 +22,59 @@ namespace EvaluationTest
         {
             //FakePredictionData initialisation
             FakePredictionData = new DiseasesData(
-                Type.Symptom, 
+                type.Symptom, 
                 new List<DiseaseData>()
                     {
                         new DiseaseData(
                             new Disease("101039", "Female restricted epilepsy with intellectual disability", 42), 
                             new RelatedEntities(
-                                Type.Symptom, 
+                                type.Symptom, 
                                 new List<RelatedEntity>()
                                     {
-                                    new RelatedEntity(Type.Symptom, "hyperactivity", 2.4),
-                                    new RelatedEntity(Type.Symptom, "epileptic encephalopathy", 2.0)
+                                    new RelatedEntity(type.Symptom, "hyperactivity", 2.4),
+                                    new RelatedEntity(type.Symptom, "epileptic encephalopathy", 2.0)
                                 })),
                         new DiseaseData(
                             new Disease("100080", "Test Disease", 12),
                             new RelatedEntities(
-                                Type.Symptom,
+                                type.Symptom,
                                 new List<RelatedEntity>()
                                     {
-                                    new RelatedEntity(Type.Symptom, "atherosclerosis", 50.0),
-                                    new RelatedEntity(Type.Symptom, "death", 16.0),
-                                    new RelatedEntity(Type.Symptom, "brain neoplasm", 70.0)
+                                    new RelatedEntity(type.Symptom, "atherosclerosis", 50.0),
+                                    new RelatedEntity(type.Symptom, "death", 16.0),
+                                    new RelatedEntity(type.Symptom, "brain neoplasm", 70.0)
                                 }))
                     });
 
             //FakeRealData initialisation
             FakeRealData = new DiseasesData(
-                Type.Symptom,
+                type.Symptom,
                 new List<DiseaseData>()
                     {
                         new DiseaseData(
                             new Disease("101039", "Female restricted epilepsy with intellectual disability", 42),
                             new RelatedEntities(
-                                Type.Symptom,
+                                type.Symptom,
                                 new List<RelatedEntity>()
                                     {
                                     //1 predicted symptom deleted
-                                    new RelatedEntity(Type.Symptom, "epileptic encephalopathy", 2.0),
+                                    new RelatedEntity(type.Symptom, "epileptic encephalopathy", 2.0),
 
                                     //2 real symptom added
-                                    new RelatedEntity(Type.Symptom, "SymptomTest1", 40.0),
-                                    new RelatedEntity(Type.Symptom, "SymptomTest2", 70.0)
+                                    new RelatedEntity(type.Symptom, "SymptomTest1", 40.0),
+                                    new RelatedEntity(type.Symptom, "SymptomTest2", 70.0)
                                 })),
                         new DiseaseData(
                             new Disease("100080", "Test Disease", 12),
                             new RelatedEntities(
-                                Type.Symptom,
+                                type.Symptom,
                                 new List<RelatedEntity>()
                                     {
                                     //2 predicted symptom deleted
-                                    new RelatedEntity(Type.Symptom, "death", 16.0),
+                                    new RelatedEntity(type.Symptom, "death", 16.0),
 
                                     //1 real symptom added
-                                    new RelatedEntity(Type.Symptom, "SymptomTest3", 45.6)
+                                    new RelatedEntity(type.Symptom, "SymptomTest3", 45.6)
                                 }))
                     });
         }

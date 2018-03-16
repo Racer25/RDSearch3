@@ -21,6 +21,8 @@ namespace WebCrawler
 
         public ConcurrentBag<Disease> Diseases { get; set; }
 
+        public DiseasesData RealData { get; set; }
+
         public DateTime LastUpdateDateFromURL { get; set; }
 
         public OrphaEngine()
@@ -35,6 +37,9 @@ namespace WebCrawler
 
             GetRareDiseases();
             SaveDiseasesOnDB();
+
+            GetRealData();
+            SaveRealDataOnDB();
             /*
             Disease test;
             bool tryTest = Diseases.TryPeek(out test);
@@ -297,13 +302,13 @@ namespace WebCrawler
             using (var configRepository = new MongoRepository.ConfigRepository())
             using (var diseaseRepository = new MongoRepository.DiseaseRepository())
             {
-                if (configRepository.selectConfig() == null || LastUpdateDateFromURL > configRepository.selectConfig()?.lastUpdateDateOfDiseasesList)
+                if (configRepository.selectConfig() == null || 
+                    LastUpdateDateFromURL > configRepository.selectConfig()?.lastUpdateDateOfDiseasesList)
                 {
+                    Console.WriteLine("Update detected!!");
+                    Console.WriteLine("Saving diseases information on DB ..");
                     //We clear the collection
                     diseaseRepository.removeAll();
-
-                    Console.WriteLine("Starting request for OrphaData/Orphanet this can take some time...");
-                    Console.WriteLine("Saving diseases information...");
 
                     var lst_diseases = Diseases.ToList();
 
@@ -321,6 +326,83 @@ namespace WebCrawler
                     Console.WriteLine("Last update date from DB is: " + configRepository.selectConfig()?.lastUpdateDateOfDiseasesList);
                     Console.WriteLine("No update detected, using offline disease information only");
                 }
+            }
+        }
+
+        public void GetRealData()
+        {
+            RealData = new DiseasesData(type.Symptom, new List<DiseaseData>());
+
+            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_RealSymptomsByDisease"));
+            request.AutomaticDecompression = DecompressionMethods.GZip;
+            XmlSerializer serializer = new XmlSerializer(typeof(SymptomsEval.JDBOR));
+            SymptomsEval.JDBOR result = new SymptomsEval.JDBOR();
+
+            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var stream = response.GetResponseStream())
+            using (var reader = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+            {
+                result = serializer.Deserialize(reader) as SymptomsEval.JDBOR;
+            }
+
+            var disorders = result.DisorderList[0].Disorder;
+
+            foreach (var disorder in disorders)
+            {
+                //Constructing DiseaseData
+                DiseaseData myDiseaseData = new DiseaseData(
+                    Diseases.Where(x => x.OrphaNumber == disorder.OrphaNumber).FirstOrDefault(),
+                    new RelatedEntities(type.Symptom, new List<RelatedEntity>()));
+
+
+                
+                var hpoPhenotypes = disorder.HPODisorderAssociationList[0].HPODisorderAssociation.ToList();
+                for (int j = 0; j < hpoPhenotypes.Count; j++)
+                {
+                    string symptomName = hpoPhenotypes[j].HPO[0].HPOTerm.ToLower();
+
+                    //Frequency
+                    var frequency = hpoPhenotypes[j].HPOFrequency[0].Name[0].Value;
+                    double weight = 0;
+                    if (frequency.Equals("Obligate (100%)"))
+                    {
+                        weight = 100.0;
+                    }
+                    else if (frequency.Equals("Very frequent (99-80%)"))
+                    {
+                        weight = 90.0;
+                    }
+                    else if (frequency.Equals("Frequent (79-30%)"))
+                    {
+                        weight = 55.0;
+                    }
+                    else if (frequency.Equals("Occasional (29-5%)"))
+                    {
+                        weight = 17.5;
+                    }
+                    else if (frequency.Equals("Very rare (<4-1%)"))
+                    {
+                        weight = 2.5;
+                    }
+
+                    RelatedEntity symptom = new RelatedEntity(type.Symptom, symptomName, weight);
+
+                    myDiseaseData.RelatedEntities.RelatedEntitiesList.Add(symptom);
+                }
+
+                RealData.DiseaseDataList.Add(myDiseaseData);
+            }
+        }
+
+        public void SaveRealDataOnDB()
+        {
+            using (var realDataRepository = new MongoRepository.RealDataRepository())
+            {
+                //We clear the collection
+                realDataRepository.removeAll();
+
+                //We stock the retrieved diseases in DB
+                realDataRepository.insert(RealData);
             }
         }
 

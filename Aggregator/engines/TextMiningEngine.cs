@@ -27,12 +27,12 @@ namespace CrawlerOrphanet
         {
             Console.WriteLine("TextMiningEngine initialization ...");
             symptomsList = new List<Symptom>();
-            getSymptomsList();
+            GetSymptomsList();
             //getSymptomsListBeta();
             Console.WriteLine("TextMiningEngine initialization finished");
         }
 
-        public List<Symptom> getSymptomsFromPublications(List<Publication> publications)
+        public List<Symptom> GetSymptomsFromPublications(List<Publication> publications)
         {
             List<Symptom> extractedSymptoms = new List<Symptom>();
 
@@ -131,7 +131,7 @@ namespace CrawlerOrphanet
             return extractedSymptoms;
         }
 
-        public void getSymptomsList()
+        public void GetSymptomsList()
         {
             Console.WriteLine("Retriveing symptomsNamesList ...");
 

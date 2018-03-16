@@ -6,10 +6,10 @@ namespace MongoRepository.entities
 {
     public class RelatedEntities
     {
-        public Type Type { get; set; }
+        public type Type { get; set; }
         public List<RelatedEntity> RelatedEntitiesList { get; set; }
 
-        public RelatedEntities(Type TypeP, List<RelatedEntity> RelatedEntitiesListP)
+        public RelatedEntities(type TypeP, List<RelatedEntity> RelatedEntitiesListP)
         {
             Type = TypeP;
             RelatedEntitiesList = RelatedEntitiesListP;

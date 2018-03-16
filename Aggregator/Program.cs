@@ -34,39 +34,45 @@ namespace CrawlerOrphanet
             pubmedEngine.Start(lst_diseases);
 
             //Retrieving related entities by disease AND TextMine
-            RecupSymptomsAndTextMine(lst_diseases);
-            RecupLinkedDiseasesAndTextMine(lst_diseases);
-            RecupDrugsAndTextMine(lst_diseases);
+            TextMiningEngine textMiningEngine = new TextMiningEngine();
+            RecupSymptomsAndTextMine(lst_diseases, textMiningEngine);
+            //RecupLinkedDiseasesAndTextMine(lst_diseases, textMiningEngine);
+           // RecupDrugsAndTextMine(lst_diseases, textMiningEngine);
 
-            //Retrieving PredictionData and RealData from DB (type: DiseasesData)....TODO
+            //Retrieving PredictionData and RealData from DB (DiseasesData with type Symptom)
             DiseasesData PredictionData = null;
             DiseasesData RealData = null;
+            using (var dbPred = new MongoRepository.PredictionDataRepository())
+            using (var dbReal = new MongoRepository.RealDataRepository())
+            {
+                PredictionData = dbPred.selectByType(type.Symptom);
+                RealData = dbReal.selectByType(type.Symptom);
+            }
 
 
             //Evaluation...
-            Evaluator.Evaluate(PredictionData, RealData);
+            if(PredictionData != null && RealData != null)
+            {
+                Evaluator.Evaluate(PredictionData, RealData);
+            }
 
 
             Console.WriteLine("Finished :)");
             Console.ReadLine();
         }
 
-        static void RecupLinkedDiseasesAndTextMine(List<Disease> lst_diseases)
+        static void RecupLinkedDiseasesAndTextMine(List<Disease> lst_diseases, TextMiningEngine textMiningEngine)
         {
             throw new NotImplementedException();
         }
 
-        static void RecupDrugsAndTextMine(List<Disease> lst_diseases)
+        static void RecupDrugsAndTextMine(List<Disease> lst_diseases, TextMiningEngine textMiningEngine)
         {
             throw new NotImplementedException();
         }
 
-        static void RecupSymptomsAndTextMine(List<Disease> lst_diseases)
+        static void RecupSymptomsAndTextMine(List<Disease> lst_diseases, TextMiningEngine textMiningEngine)
         {
-            //TextMining
-            TextMiningEngine textMiningEngine = new TextMiningEngine();
-
-
             //Use TextMiningEngine....
 
             //BatchConfig
@@ -120,7 +126,7 @@ namespace CrawlerOrphanet
                 Console.WriteLine("Publications recup finished!");
 
                 //Extraction Symptomes
-                Console.WriteLine("Extraction Symptomes...");
+                Console.WriteLine("Extraction Symptoms...");
 
                 TimeLeft.Instance.Reset();
                 TimeLeft.Instance.operationsToDo = publicationsPerDisease.Count;
@@ -131,7 +137,7 @@ namespace CrawlerOrphanet
                     Stopwatch diffTime = new Stopwatch();
                     diffTime.Start();
 
-                    List<Symptom> symptomsExtracted = textMiningEngine.getSymptomsFromPublications(pubs);
+                    List<Symptom> symptomsExtracted = textMiningEngine.GetSymptomsFromPublications(pubs);
                     using (var symptomRepository = new MongoRepository.SymptomRepository())
                     {
                         symptomRepository.deleteByOrphaNumber(pubs[0].orphaNumberOfLinkedDisease);

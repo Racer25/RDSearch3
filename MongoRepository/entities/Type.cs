@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MongoRepository.entities
 {
-    public enum Type
+    public enum type
     {
         Symptom,
         RelatedDisease,

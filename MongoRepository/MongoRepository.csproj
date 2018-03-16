@@ -149,7 +149,7 @@
     <Compile Include="entities\NumberPublicationsForOneYear.cs" />
     <Compile Include="entities\RelatedEntities.cs" />
     <Compile Include="entities\RelatedEntity.cs" />
-    <Compile Include="entities\Type.cs" />
+    <Compile Include="entities\type.cs" />
     <Compile Include="repositories\ConfigRepository.cs" />
     <Compile Include="entities\Config.cs" />
     <Compile Include="entities\Disease.cs" />
@@ -158,7 +158,9 @@
     <Compile Include="entities\Symptom.cs" />
     <Compile Include="entities\TextualInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="repositories\PredictionDataRepository.cs" />
     <Compile Include="repositories\PublicationRepository.cs" />
+    <Compile Include="repositories\RealDataRepository.cs" />
     <Compile Include="repositories\SymptomRepository.cs" />
   </ItemGroup>
   <ItemGroup>
