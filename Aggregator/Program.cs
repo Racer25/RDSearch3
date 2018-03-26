@@ -9,35 +9,48 @@ using CrawlerOrphanet.tools;
 using System.Diagnostics;
 using ConfigurationJSON;
 using Evaluation;
+using System.IO;
 
 namespace CrawlerOrphanet
 {
     class Program
     {
+        public static List<List<Publication>> publicationsPerDisease;
         static void Main(string[] args)
         {
+            //Environnement variables
+            var path = Environment.GetEnvironmentVariable("RD_AGGREGATOR_SETTINGS");
+            ConfigurationManager.Instance.Init(path);
+
+            //TESTED AND DONE
+            /*
             //Update Orphanet (diseases/real datasets TODO)
             OrphaEngine orphaEngine = new OrphaEngine();
             orphaEngine.Start();
-
+            */
+            
             //Retrieving diseases from DB
             List<Disease> lst_diseases = new List<Disease>();
             using (var db = new MongoRepository.DiseaseRepository())
             {
-                //lst_diseases = db.selectAll().Take(500).ToList();
+                //lst_diseases = db.selectAll().Take(10).ToList();
                 lst_diseases = db.selectAll();
             }
-            
+
+            //TESTED AND DONE
+            /*
             //Update Publications
             PubmedEngine pubmedEngine = new PubmedEngine();
             Console.WriteLine("Starting requests at PMC this can take some time...");
-            pubmedEngine.Start(lst_diseases);
+            pubmedEngine.Start2(lst_diseases);
+            */
+
 
             //Retrieving related entities by disease AND TextMine
             TextMiningEngine textMiningEngine = new TextMiningEngine();
             RecupSymptomsAndTextMine(lst_diseases, textMiningEngine);
             //RecupLinkedDiseasesAndTextMine(lst_diseases, textMiningEngine);
-           // RecupDrugsAndTextMine(lst_diseases, textMiningEngine);
+            //RecupDrugsAndTextMine(lst_diseases, textMiningEngine);
 
             //Retrieving PredictionData and RealData from DB (DiseasesData with type Symptom)
             DiseasesData PredictionData = null;
@@ -55,7 +68,7 @@ namespace CrawlerOrphanet
             {
                 Evaluator.Evaluate(PredictionData, RealData);
             }
-
+            
 
             Console.WriteLine("Finished :)");
             Console.ReadLine();
@@ -76,7 +89,7 @@ namespace CrawlerOrphanet
             //Use TextMiningEngine....
 
             //BatchConfig
-            int batchSize = ConfigurationManager.GetSetting("BatchSizePMC");
+            int batchSize = ConfigurationManager.Instance.config.BatchSizePMC;
             int nombreBatch = (lst_diseases.Count / batchSize) + 1;
             if ((nombreBatch - 1) * batchSize == lst_diseases.Count)
             {
@@ -101,7 +114,7 @@ namespace CrawlerOrphanet
                 //REAL Process
                 //Publication recup
                 Console.WriteLine("Publications recup...");
-                List<List<Publication>> publicationsPerDisease = new List<List<Publication>>();
+                publicationsPerDisease = new List<List<Publication>>();
                 using (var publicationRepository = new MongoRepository.PublicationRepository())
                 {
                     //Parallel.ForEach(lst_diseases, (disease) =>
@@ -120,63 +133,62 @@ namespace CrawlerOrphanet
                         TimeLeft.Instance.IncrementOfXOperations(TimeSpan.FromMilliseconds(diffTime.ElapsedMilliseconds).Seconds, 1);
                         TimeLeft.Instance.CalcAndShowTimeLeft(i + 1, nombreBatch);
                     }
+                    Console.WriteLine("Publications recup finished!");
                     //);
-                }
 
-                Console.WriteLine("Publications recup finished!");
+                    //Extraction Symptomes
+                    Console.WriteLine("Extraction Symptoms...");
 
-                //Extraction Symptomes
-                Console.WriteLine("Extraction Symptoms...");
-
-                TimeLeft.Instance.Reset();
-                TimeLeft.Instance.operationsToDo = publicationsPerDisease.Count;
-
-                //foreach(List<Publication> pubs in publicationsPerDisease)
-                Parallel.ForEach(publicationsPerDisease, (pubs) =>
-                {
-                    Stopwatch diffTime = new Stopwatch();
-                    diffTime.Start();
-
-                    List<Symptom> symptomsExtracted = textMiningEngine.GetSymptomsFromPublications(pubs);
-                    using (var symptomRepository = new MongoRepository.SymptomRepository())
+                    //foreach(List<Publication> pubs in publicationsPerDisease)
+                    Parallel.ForEach(publicationsPerDisease, (pubs) =>
                     {
-                        symptomRepository.deleteByOrphaNumber(pubs[0].orphaNumberOfLinkedDisease);
-                        if (symptomsExtracted.Count != 0)
-                        {
-                            try
-                            {
-                                symptomRepository.insertList(symptomsExtracted);
-                                /*
-                                List<Symptom> lst_symptoms = new List<Symptom>();
-                                for(int k = 0; k < 42; k++)
-                                {
-                                    Symptom symptom = new Symptom();
-                                    symptom.Name = "Paul";
-                                    symptom.OrphaNumber = "caca";
-                                    symptom.Weight = 42;
-                                    lst_symptoms.Add(symptom);
-                                }
-                                symptomRepository.insertList(lst_symptoms);*/
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine("symptomsExtracted.Count= " + symptomsExtracted.Count);
-                                Console.WriteLine(e);
+                        Stopwatch diffTime = new Stopwatch();
+                        diffTime.Start();
 
-                                foreach (Symptom symptom in symptomsExtracted)
+                        List<Symptom> symptomsExtracted = textMiningEngine.GetSymptomsFromPublications(pubs);
+                        using (var symptomRepository = new MongoRepository.SymptomRepository())
+                        {
+                            symptomRepository.deleteByOrphaNumber(pubs[0].orphaNumberOfLinkedDisease);
+                            if (symptomsExtracted.Count != 0)
+                            {
+                                try
                                 {
-                                    symptom.Show();
+                                    symptomRepository.insertList(symptomsExtracted);
+                                    /*
+                                    List<Symptom> lst_symptoms = new List<Symptom>();
+                                    for(int k = 0; k < 42; k++)
+                                    {
+                                        Symptom symptom = new Symptom();
+                                        symptom.Name = "Paul";
+                                        symptom.OrphaNumber = "caca";
+                                        symptom.Weight = 42;
+                                        lst_symptoms.Add(symptom);
+                                    }
+                                    symptomRepository.insertList(lst_symptoms);*/
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine("symptomsExtracted.Count= " + symptomsExtracted.Count);
+                                    Console.WriteLine(e);
+
+                                    foreach (Symptom symptom in symptomsExtracted)
+                                    {
+                                        symptom.Show();
+                                    }
                                 }
                             }
                         }
+
+                        diffTime.Stop();
+
+                        TimeLeft.Instance.IncrementOfXOperations(TimeSpan.FromMilliseconds(diffTime.ElapsedMilliseconds).Seconds, 1);
+                        TimeLeft.Instance.CalcAndShowTimeLeft(i + 1, nombreBatch);
                     }
-
-                    diffTime.Stop();
-
-                    TimeLeft.Instance.IncrementOfXOperations(TimeSpan.FromMilliseconds(diffTime.ElapsedMilliseconds).Seconds, 1);
-                    TimeLeft.Instance.CalcAndShowTimeLeft(i + 1, nombreBatch);
+                    );
                 }
-                );
+                
+                TimeLeft.Instance.Reset();
+                TimeLeft.Instance.operationsToDo = publicationsPerDisease.Count;
             }
         }
     }

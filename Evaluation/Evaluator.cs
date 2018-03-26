@@ -122,7 +122,7 @@ namespace Evaluation
                 fileName = "results_" + results.general.TimeStamp.ToString("yyyy-MM-dd_HH-mm-ss") + ".json";
             }
 
-            File.WriteAllText(ConfigurationManager.GetSetting("ResultsFolder") + fileName, output);
+            File.WriteAllText(ConfigurationManager.Instance.config.ResultsFolder + fileName, output);
 
         }
     }

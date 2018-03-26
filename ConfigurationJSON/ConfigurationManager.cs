@@ -2,30 +2,44 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ConfigurationJSON
 {
     public class ConfigurationManager
     {
-        public static dynamic GetSetting(string setting)
+        public Config config;
+
+        private static ConfigurationManager _instance;
+
+        public static ConfigurationManager Instance
         {
-            //Trouver le fichier de configuration
-            // Config (provided through a settings.json file)
-            var execution_path = AppDomain.CurrentDomain.BaseDirectory;
-            
-            if (execution_path.EndsWith("/bin/Debug/"))
-                execution_path = execution_path.Replace("/bin/Debug", "/..");
-            if (execution_path.EndsWith(@"\bin\Debug\"))
-                execution_path = execution_path.Replace(@"\bin\Debug", @"\..");
-
-
-            var user_config_filename = "settings.json";
-
-            using (StreamReader r = new StreamReader(execution_path + "/"+user_config_filename))
+            get
             {
-                Config config = JsonConvert.DeserializeObject<Config>(r.ReadToEnd());
+                if(_instance == null)
+                {
+                    _instance = new ConfigurationManager();
+                }
+                return _instance;
+            }
+            protected set { _instance = value; }
+        }
 
-                return config.GetType().GetProperty(setting).GetValue(config, null);
+        private ConfigurationManager()
+        {
+
+        }
+
+        public void Init(string path)
+        {
+            var realPath = $"{path}\\settings.json";
+            if (path.EndsWith("settings.json"))
+            {
+                realPath=$"{path}";
+            }
+            using (StreamReader r = new StreamReader(realPath))
+            {
+                config = JsonConvert.DeserializeObject<Config>(r.ReadToEnd());
             }
         }
     }

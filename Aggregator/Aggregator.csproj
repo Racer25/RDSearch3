@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <StartupObject>CrawlerOrphanet.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ConfigurationJSON\ConfigurationJSON.csproj" />
     <ProjectReference Include="..\Evaluation\Evaluation.csproj" />
-    <ProjectReference Include="..\MongoRepository\MongoRepository.csproj" />
+    <ProjectReference Include="..\MongoRepository2\MongoRepository.csproj" />
   </ItemGroup>
 
 </Project>

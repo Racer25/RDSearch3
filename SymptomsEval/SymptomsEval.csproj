@@ -130,17 +130,17 @@
     <Compile Include="SymptomOrphanet.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MongoRepository\MongoRepository.csproj">
-      <Project>{31c07cc3-77d0-4eeb-85cf-39ff3436b2a3}</Project>
-      <Name>MongoRepository</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Service1.svc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MongoRepository2\MongoRepository.csproj">
+      <Project>{2df34dcc-f1f8-43a4-83db-9cabfdea410d}</Project>
+      <Name>MongoRepository</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

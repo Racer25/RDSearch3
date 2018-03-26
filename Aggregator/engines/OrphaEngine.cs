@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using MongoRepository.entities;
 using ConfigurationJSON;
+using System.Net;
+using System.Net.Http;
 
 namespace WebCrawler
 {
@@ -21,13 +22,16 @@ namespace WebCrawler
 
         public ConcurrentBag<Disease> Diseases { get; set; }
 
-        public DiseasesData RealData { get; set; }
+        private DiseasesData RealData;
 
         public DateTime LastUpdateDateFromURL { get; set; }
+
+        private HttpClient client;
 
         public OrphaEngine()
         {
             Diseases = new ConcurrentBag<Disease>();
+            client = new HttpClient();
         }
 
         public void Start()
@@ -35,11 +39,19 @@ namespace WebCrawler
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
+            Console.WriteLine("Getting Rare diseases info...");
+            GetLastUpdateDateFromURL();
             GetRareDiseases();
+            Console.WriteLine("Saving Rare diseases info...");
             SaveDiseasesOnDB();
 
+            Console.WriteLine("Getting symptoms of diseases ...");
             GetRealData();
+            Console.WriteLine("Saving symptoms of diseases ...");
             SaveRealDataOnDB();
+
+            Diseases = null;
+            RealData = null;
             /*
             Disease test;
             bool tryTest = Diseases.TryPeek(out test);
@@ -182,39 +194,24 @@ namespace WebCrawler
 
         private void GetRareDiseases()
         {
-            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_Rare_Diseases"));
-            request.AutomaticDecompression = DecompressionMethods.GZip;
+            var disorders = Datas.JDBOR[0].DisorderList[0].Disorder;
 
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
-            {
-                //Console.WriteLine("Parsing request this can take some time...");
-                Datas = JsonConvert.DeserializeObject<OrphaData>(reader.ReadToEnd());
-                
-                var disorders = Datas.JDBOR[0].DisorderList[0].Disorder;
+            LaunchBatchs(disorders, 0, ConfigurationManager.Instance.config.BatchSizeDiseases);
 
-                LaunchBatchs(disorders, 0, ConfigurationManager.GetSetting("BatchSizeDiseases"));
-
-                Console.WriteLine("I found {0} diseases", Diseases.Count);
-            }
+            Console.WriteLine("I found {0} diseases", Diseases.Count);
         }
 
         public void GetLastUpdateDateFromURL()
         {
-            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_Rare_Diseases"));
-            request.AutomaticDecompression = DecompressionMethods.GZip;
-
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
+            using (HttpResponseMessage res = client.GetAsync(ConfigurationManager.Instance.config.URL_Rare_Diseases).Result)
+            using (HttpContent content = res.Content)
+            //using (var stream = await content.ReadAsStreamAsync())
             {
-                //Console.WriteLine("Parsing request this can take some time...");
-                Datas = JsonConvert.DeserializeObject<OrphaData>(reader.ReadToEnd());
+                Datas = JsonConvert.DeserializeObject<OrphaData>(content.ReadAsStringAsync().Result);
 
                 LastUpdateDateFromURL = DateTime.ParseExact(Datas.JDBOR[0].date, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
 
-                Console.WriteLine("Last update from url is: "+ LastUpdateDateFromURL);
+                Console.WriteLine("Last update from url is: " + LastUpdateDateFromURL);
             }
         }
 
@@ -233,7 +230,7 @@ namespace WebCrawler
             //Parallel.for(int i = indexDisorder; i < indexDisorder + size; i++)
             Parallel.For(indexDisorder, indexDisorder + size, (i) =>
             {
-                ProgressBar.Instance.Report((double)indexDisorder / disorders.Length);
+                //ProgressBar.Instance.Report((double)indexDisorder / disorders.Length);
 
                 //var disorder = Datas.JDBOR[0].DisorderList[0].Disorder[i];
 
@@ -278,7 +275,7 @@ namespace WebCrawler
                             }
                         }
                     }
-                    //Console.WriteLine("Saving diseases information from orphanet website...");
+                    /*
                     var url = disorders[i].ExpertLink[0].link;
                     var web = new HtmlWeb();
                     var doc = web.Load(url);
@@ -286,9 +283,9 @@ namespace WebCrawler
                     if(doc != null)
                     {
                         ParseExpertData(d, ref doc);
-                    }
-
-                    //Console.WriteLine("OrphaNumber: "+d.OrphaNumber);
+                    }*/
+                    
+                    
 
                     Diseases.Add(d);
                 }
@@ -333,7 +330,7 @@ namespace WebCrawler
         {
             RealData = new DiseasesData(type.Symptom, new List<DiseaseData>());
 
-            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_RealSymptomsByDisease"));
+            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.Instance.config.URL_RealSymptomsByDisease);
             request.AutomaticDecompression = DecompressionMethods.GZip;
             XmlSerializer serializer = new XmlSerializer(typeof(SymptomsEval.JDBOR));
             SymptomsEval.JDBOR result = new SymptomsEval.JDBOR();
@@ -406,7 +403,7 @@ namespace WebCrawler
             }
         }
 
-            public void Stop()
+        public void Stop()
         {
         }
     }

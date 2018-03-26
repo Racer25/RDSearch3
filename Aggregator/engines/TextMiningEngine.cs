@@ -16,16 +16,19 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using CrawlerOrphanet.tools;
 using ConfigurationJSON;
+using System.Net.Http;
 
 namespace CrawlerOrphanet
 {
     class TextMiningEngine
     {
         private List<Symptom> symptomsList;
+        private HttpClient client;
 
         public TextMiningEngine()
         {
             Console.WriteLine("TextMiningEngine initialization ...");
+            client = new HttpClient();
             symptomsList = new List<Symptom>();
             GetSymptomsList();
             //getSymptomsListBeta();
@@ -134,16 +137,9 @@ namespace CrawlerOrphanet
         public void GetSymptomsList()
         {
             Console.WriteLine("Retriveing symptomsNamesList ...");
-
-            var request = (HttpWebRequest)WebRequest.Create(ConfigurationManager.GetSetting("URL_SymptomsList"));
-            request.AutomaticDecompression = DecompressionMethods.GZip;
-
-            Console.WriteLine("Starting request for HPO this can take some time...");
-
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
-            using (var stringReader = new StringReader(reader.ReadToEnd()))
+            using (HttpResponseMessage res = client.GetAsync($"{ConfigurationManager.Instance.config.URL_SymptomsList}").Result)
+            using (HttpContent content = res.Content)
+            using (var stringReader = new StringReader(content.ReadAsStringAsync().Result))
             {
                 List<PotentialSymptom> potentialSymptoms = new List<PotentialSymptom>();
 

@@ -100,13 +100,10 @@ namespace EvaluationTest
             Evaluator.Evaluate(PredictionData, RealData, testFileName);
 
             //Test the linkedFile....
-            System.Console.WriteLine("Config.User.ResultsFolder: " + ConfigurationManager.GetSetting("ResultsFolder") + "results.json");
-
-            int maVar = ConfigurationManager.GetSetting("Entier");
-            System.Console.WriteLine(maVar);
+            System.Console.WriteLine("Config.User.ResultsFolder: " + ConfigurationManager.Instance.config.ResultsFolder + "results.json");
 
             //using (StreamReader r = new StreamReader(Config.User.ResultsFolder + "results.json"))
-            using (StreamReader r = new StreamReader(ConfigurationManager.GetSetting("ResultsFolder") + testFileName))
+            using (StreamReader r = new StreamReader(ConfigurationManager.Instance.config.ResultsFolder + testFileName))
             {
                 Results results = JsonConvert.DeserializeObject<Results>(r.ReadToEnd());
 

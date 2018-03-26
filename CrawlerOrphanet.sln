@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoRepository", "MongoRepository\MongoRepository.csproj", "{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SymptomsEval", "SymptomsEval\SymptomsEval.csproj", "{66DF5C35-8003-4864-B536-3BF0C368A90E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Evaluation", "Evaluation\Evaluation.csproj", "{B85C0AAE-EB70-4581-BC02-B3FC015A4B1A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationJSON", "ConfigurationJSON\ConfigurationJSON.csproj", "{4ACD2FF1-CD63-4E02-A885-471DC38E66AF}"
@@ -20,25 +16,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator", "Aggregator\Ag
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCrawler", "TestCrawler\TestCrawler.csproj", "{500D5161-E6CA-4630-943E-A1BECCCFA6B8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoRepository", "MongoRepository2\MongoRepository.csproj", "{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SymptomEval2", "SymptomEval2\SymptomEval2.csproj", "{44A066C4-F34D-42D8-8F23-12AA109C017B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestXMLSerializer", "TestXMLSerializer\TestXMLSerializer.csproj", "{7C1A2F8A-D007-46C8-8FAA-059C177FF850}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 		SymptomEval|Any CPU = SymptomEval|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.SymptomEval|Any CPU.ActiveCfg = Release|Any CPU
-		{31C07CC3-77D0-4EEB-85CF-39FF3436B2A3}.SymptomEval|Any CPU.Build.0 = Release|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.SymptomEval|Any CPU.ActiveCfg = Release|Any CPU
-		{66DF5C35-8003-4864-B536-3BF0C368A90E}.SymptomEval|Any CPU.Build.0 = Release|Any CPU
 		{B85C0AAE-EB70-4581-BC02-B3FC015A4B1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B85C0AAE-EB70-4581-BC02-B3FC015A4B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B85C0AAE-EB70-4581-BC02-B3FC015A4B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +56,24 @@ Global
 		{500D5161-E6CA-4630-943E-A1BECCCFA6B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{500D5161-E6CA-4630-943E-A1BECCCFA6B8}.SymptomEval|Any CPU.ActiveCfg = Debug|Any CPU
 		{500D5161-E6CA-4630-943E-A1BECCCFA6B8}.SymptomEval|Any CPU.Build.0 = Debug|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.SymptomEval|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DF34DCC-F1F8-43A4-83DB-9CABFDEA410D}.SymptomEval|Any CPU.Build.0 = Debug|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.SymptomEval|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A066C4-F34D-42D8-8F23-12AA109C017B}.SymptomEval|Any CPU.Build.0 = Debug|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.SymptomEval|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C1A2F8A-D007-46C8-8FAA-059C177FF850}.SymptomEval|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
