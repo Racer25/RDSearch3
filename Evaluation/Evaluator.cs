@@ -72,9 +72,21 @@ namespace Evaluation
                     }
 
                     //Compute Precision/recall and F_score
-                    double PrecisionDisease = Math.Round((double)RP_Disease / (double)(RP_Disease + FP_Disease), 4);
-                    double RecallDisease = Math.Round((double)RP_Disease / (double)(RP_Disease + FN_Disease), 4);
-                    double F_ScoreDisease = Math.Round(2 * PrecisionDisease * RecallDisease / (PrecisionDisease + RecallDisease), 4);
+                    double PrecisionDisease=0.0;
+                    double RecallDisease=0.0;
+                    double F_ScoreDisease=0.0;
+                    if (RP_Disease + FP_Disease != 0)
+                    {
+                        PrecisionDisease = Math.Round((double)RP_Disease / (double)(RP_Disease + FP_Disease), 4);
+                    }
+                    if(RP_Disease + FN_Disease != 0)
+                    {
+                        RecallDisease = Math.Round((double)RP_Disease / (double)(RP_Disease + FN_Disease), 4);
+                    }
+                    if(PrecisionDisease + RecallDisease != 0.0)
+                    {
+                        F_ScoreDisease = Math.Round(2 * PrecisionDisease * RecallDisease / (PrecisionDisease + RecallDisease), 4);
+                    }
 
                     //Construct results object
                     PerDisease OnePerDisease = new PerDisease(orphaNumber,
@@ -94,9 +106,21 @@ namespace Evaluation
             }
 
             //Compute Precision/recall and F_score
-            double Precision = Math.Round((double)RP / (double)(RP + FP), 4);
-            double Recall = Math.Round((double)RP / (double)(RP + FN), 4);
-            double F_Score = Math.Round(2 * Precision * Recall / (Precision + Recall), 4);
+            double Precision = 0.0;
+            double Recall = 0.0;
+            double F_Score = 0.0;
+            if (RP + FP != 0)
+            {
+                Precision = Math.Round((double)RP / (double)(RP + FP), 4);
+            }
+            if (RP + FN != 0)
+            {
+                Recall = Math.Round((double)RP / (double)(RP + FN), 4);
+            }
+            if (Precision + Recall != 0.0)
+            {
+                F_Score = Math.Round(2 * Precision * Recall / (Precision + Recall), 4);
+            }
 
             //Construct results object
             results.general = new General(DateTime.Now, 
