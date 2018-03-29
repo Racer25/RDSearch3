@@ -16,5 +16,7 @@ namespace ConfigurationJSON
         public string Email { get; set; }
         public int BatchSizeDiseases { get; set; }
         public int BatchSizePMC { get; set; }
+        public int BatchSizeTextMining { get; set; }
+        public int MaxNumberSymptoms { get; set; }
     }
 }

@@ -20,11 +20,11 @@ namespace Evaluation
             int FN = 0;//FalseNegative general
 
             //For each existent rare disease
-            foreach(string orphaNumber in PredictionData.DiseaseDataList.Select(x => x.Disease.OrphaNumber))
+            foreach(string orphaNumber in PredictionData.DiseaseDataList.Select(x => x?.Disease?.OrphaNumber))
             {
                 //Find THE diseaseData of ONE disease (real and predicted data)
-                DiseaseData RealDiseaseData = RealData.DiseaseDataList.Where(x => x.Disease.OrphaNumber == orphaNumber).FirstOrDefault();
-                DiseaseData PredictionDiseaseData = PredictionData.DiseaseDataList.Where(x => x.Disease.OrphaNumber == orphaNumber).FirstOrDefault();
+                DiseaseData RealDiseaseData = RealData.DiseaseDataList.Where(x => x?.Disease?.OrphaNumber == orphaNumber).FirstOrDefault();
+                DiseaseData PredictionDiseaseData = PredictionData.DiseaseDataList.Where(x => x?.Disease?.OrphaNumber == orphaNumber).FirstOrDefault();
 
                 //If we don't find the disease in both dataset, we shoud pass to another disease
                 if(RealDiseaseData != null && PredictionDiseaseData != null)

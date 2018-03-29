@@ -23,6 +23,11 @@ namespace MongoRepository
             _collection = _database.GetCollection<Publication>("Publication");
         }
 
+        public long countForOneDisease(string orphaNumber)
+        {
+            return this._collection.CountAsync(new BsonDocument { { "orphaNumberOfLinkedDisease", orphaNumber } }).Result;
+        }
+
         public void removeAll()
         {
             this._collection.DeleteMany(new BsonDocument { });

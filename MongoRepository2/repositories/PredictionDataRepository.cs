@@ -18,7 +18,7 @@ namespace MongoRepository
         {
             _client = new MongoClient();
             _database = _client.GetDatabase("RDSearch");
-            _collection = _database.GetCollection<DiseasesData>("PredictionData");
+            _collection = _database.GetCollection<DiseasesData>("PredictionDataRepository");
         }
 
         public void removeAll()
@@ -33,7 +33,14 @@ namespace MongoRepository
 
         public DiseasesData selectByType(type monType)
         {
-            return this._collection.Find(new BsonDocument { { "Type", monType } }).FirstAsync().Result;
+            return new DiseasesData(
+                monType,
+                this._collection
+                    .Find(new BsonDocument { { "Type", monType.ToString() } })
+                    .ToList()
+                    .SelectMany(x => x.DiseaseDataList)
+                    .ToList()
+                );
         }
 
 

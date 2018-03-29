@@ -35,9 +35,16 @@ namespace CrawlerOrphanet
             Console.WriteLine("TextMiningEngine initialization finished");
         }
 
-        public List<Symptom> GetSymptomsFromPublications(List<Publication> publications)
+        //Apply to one disease only
+        public DiseaseData GetPredictionDataFromPublicationsOfOneDisease(List<Publication> publications, Disease disease)
         {
-            List<Symptom> extractedSymptoms = new List<Symptom>();
+            DiseaseData PredictionData = new DiseaseData(disease, 
+                new RelatedEntities(
+                    type.Symptom, 
+                    new List<RelatedEntity>()
+                    )
+                    );
+            List<RelatedEntity> relatedEntities = PredictionData.RelatedEntities.RelatedEntitiesList;
 
             //Construct dictionnary
             List<Symptom> phenotypes = symptomsList;
@@ -77,48 +84,60 @@ namespace CrawlerOrphanet
                     int end = chunk.end();
                     string str = cs.subSequence(start, end).toString();
 
-                    int index = extractedSymptoms.FindIndex(symptom => symptom.Name.Equals(str) || symptom.Synonyms.IndexOf(str) != -1);
+                    int index = relatedEntities.FindIndex(symptom => symptom.Name.Equals(str) || symptom.Synonyms.IndexOf(str) != -1);
                     if (index != -1)
                     {
-                        extractedSymptoms[index].Weight++;
+                        relatedEntities[index].Weight++;
                     }
                     else
                     {
-                        //Find infos from phentypes lists
+                        //Find infos from phenotypes lists
                         Symptom symptomFromPhetotypes = phenotypes.Where(x => x.Name.Equals(str) || x.Synonyms.IndexOf(str) != -1).FirstOrDefault() ;
 
-                        //Create the real Symptom
-                        Symptom symptom = new Symptom();
-                        symptom.Name = symptomFromPhetotypes.Name;
-                        symptom.Synonyms = symptomFromPhetotypes.Synonyms;
-                        symptom.Weight = 1.0;
-                        symptom.OrphaNumber = publication.orphaNumberOfLinkedDisease;
-                        extractedSymptoms.Add(symptom);
+                        //Add the real Symptom
+                        relatedEntities.Add(
+                            new RelatedEntity(
+                                type.Symptom,
+                                symptomFromPhetotypes.Name,
+                                1.0,
+                                symptomFromPhetotypes.Synonyms
+                                )
+                            );
                     }
                 }
 
             }
             
             //Symptom Weight Normalization from 0 to 100
-            for (int i = 0; i < extractedSymptoms.Count; i++)
+            for (int i = 0; i < relatedEntities.Count; i++)
             {
                 //Find Min and Max for Normalization
-                double max = extractedSymptoms.Max(x => x.Weight);
-                double min = extractedSymptoms.Min(x => x.Weight);
+                double max = relatedEntities.Max(x => x.Weight);
+                double min = relatedEntities.Min(x => x.Weight);
 
                 //Normalization
                 if (max == min)//If size==1
                 {
-                    if (extractedSymptoms[i].Weight > 100.0)
+                    if (relatedEntities[i].Weight > 100.0)
                     {
-                        extractedSymptoms[i].Weight = 100.0;
+                        relatedEntities[i].Weight = 100.0;
                     }
                 }
                 else
                 {
-                    extractedSymptoms[i].Weight = 100 * (extractedSymptoms[i].Weight - min) / (max - min);
+                    relatedEntities[i].Weight = 100 * (relatedEntities[i].Weight - min) / (max - min);
                 }
             }
+
+            //Sort related entities by descending weight
+            PredictionData.RelatedEntities.RelatedEntitiesList.OrderByDescending(x=>x.Weight).ToList();
+            //Take only a the best symptoms (see config file)
+            PredictionData.RelatedEntities.RelatedEntitiesList =
+                PredictionData.RelatedEntities.RelatedEntitiesList
+                .OrderByDescending(x => x.Weight)
+                .Take(ConfigurationManager.Instance.config.MaxNumberSymptoms)
+                .ToList();
+
             /*
             ///TEEEEEEEEEEEST
             extractedSymptoms = new List<Symptom>();
@@ -131,7 +150,7 @@ namespace CrawlerOrphanet
                 extractedSymptoms.Add(symptom);
             }*/
 
-            return extractedSymptoms;
+            return PredictionData;
         }
 
         public void GetSymptomsList()

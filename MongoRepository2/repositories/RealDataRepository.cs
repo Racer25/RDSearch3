@@ -33,7 +33,7 @@ namespace MongoRepository
 
         public DiseasesData selectByType(type monType)
         {
-            return this._collection.Find(new BsonDocument { { "Type", monType } }).FirstAsync().Result;
+            return this._collection.Find(new BsonDocument { { "Type", monType.ToString() } }).FirstOrDefaultAsync().Result;
         }
 
 

@@ -8,5 +8,7 @@
   "Tool": "RDSearch",
   "Email": "charles.cousyn1@uqac.ca",
   "BatchSizeDiseases": 150,
-  "BatchSizePMC": 1000
+  "BatchSizePMC": 1000,
+  "BatchSizeTextMining": 20,
+  "MaxNumberSymptoms": 100
 }
