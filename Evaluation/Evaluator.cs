@@ -105,7 +105,7 @@ namespace Evaluation
 
             }
 
-            //Compute Precision/recall and F_score
+            //Compute Precision/recall and F_score general
             double Precision = 0.0;
             double Recall = 0.0;
             double F_Score = 0.0;
@@ -123,8 +123,15 @@ namespace Evaluation
             }
 
             //Construct results object
-            results.general = new General(DateTime.Now, 
-                PredictionData.Type.ToString(), RP, FP, FN,  Precision,  Recall, F_Score);
+            results.general = new General(
+                DateTime.Now, 
+                PredictionData.Type.ToString(), 
+                RP, 
+                FP, 
+                FN,  
+                Precision,  
+                Recall, 
+                F_Score);
 
             //Write JSON FILE
             WriteJSONFile(results, wantedFileName);
