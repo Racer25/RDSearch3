@@ -23,11 +23,13 @@ namespace CrawlerOrphanet
             ConfigurationManager.Instance.Init(path);
 
             //TESTED AND DONE
+            
+            //Update Orphanet (diseases/real datasets)
             /*
-            //Update Orphanet (diseases/real datasets TODO)
             OrphaEngine orphaEngine = new OrphaEngine();
             orphaEngine.Start();
             */
+            
             
             //Retrieving diseases from DB
             List<Disease> lst_diseases = new List<Disease>();
@@ -60,12 +62,13 @@ namespace CrawlerOrphanet
             }
             Console.WriteLine("Update number of publications per disease finished");
 
-            
+            /*
             //Retrieving related entities by disease AND TextMine
             TextMiningEngine textMiningEngine = new TextMiningEngine();
             RecupSymptomsAndTextMine(lst_diseases, textMiningEngine);
             //RecupLinkedDiseasesAndTextMine(lst_diseases, textMiningEngine);
             //RecupDrugsAndTextMine(lst_diseases, textMiningEngine);
+            */
 
             //Retrieving PredictionData and RealData from DB (DiseasesData with type Symptom)
             DiseasesData PredictionData = null;

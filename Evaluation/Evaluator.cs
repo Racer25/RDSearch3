@@ -90,7 +90,7 @@ namespace Evaluation
 
                     //Construct results object
                     PerDisease OnePerDisease = new PerDisease(orphaNumber,
-                        RealDiseaseData.Disease.NumberOfPublications, 
+                        PredictionDiseaseData.Disease.NumberOfPublications, 
                         PredictionData.Type.ToString(),
                         RP_Disease, 
                         FP_Disease, 
