@@ -56,7 +56,7 @@ namespace CrawlerOrphanet
 
             //////////////////////////////////////////
             //FOR HMM PREPARATION
-            java.io.File modelFile = new java.io.File(@"C:\Users\CharlesCOUSYN\IdeaProjects\TrainingLingPipe\ModelDirectory\model.test");
+            java.io.File modelFile = new java.io.File($"{Environment.GetEnvironmentVariable("RD_AGGREGATOR_SETTINGS")}/Aggregator/tools/model.test");
             
             Chunker chunkerHMM = (Chunker)AbstractExternalizable.readObject(modelFile);
 
