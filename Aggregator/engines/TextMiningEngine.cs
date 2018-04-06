@@ -17,6 +17,8 @@ using System.Collections;
 using CrawlerOrphanet.tools;
 using ConfigurationJSON;
 using System.Net.Http;
+using com.aliasi.hmm;
+using com.aliasi.util;
 
 namespace CrawlerOrphanet
 {
@@ -24,6 +26,7 @@ namespace CrawlerOrphanet
     {
         private List<Symptom> symptomsList;
         private HttpClient client;
+        private ApproxDictionaryChunker chunker;
 
         public TextMiningEngine()
         {
@@ -32,6 +35,32 @@ namespace CrawlerOrphanet
             symptomsList = new List<Symptom>();
             GetSymptomsList();
             //getSymptomsListBeta();
+
+            //Preparing dictionary
+            //Construct dictionnary for symptoms
+            TrieDictionary dict = new TrieDictionary();
+            foreach (Symptom pheno in symptomsList)
+            {
+                dict.addEntry(new com.aliasi.dict.DictionaryEntry(pheno.Name, "PHENOTYPE"));
+                foreach (string synonym in pheno.Synonyms)
+                {
+                    dict.addEntry(new com.aliasi.dict.DictionaryEntry(synonym, "PHENOTYPE"));
+                }
+            }
+
+            TokenizerFactory tokenizerFactory = IndoEuropeanTokenizerFactory.INSTANCE;
+            WeightedEditDistance editDistance = new FixedWeightEditDistance(0, -1, -1, -1, System.Double.NaN);
+
+            double maxDistance = 0.0;
+            chunker = new ApproxDictionaryChunker(dict, tokenizerFactory, editDistance, maxDistance);
+
+            //////////////////////////////////////////
+            //FOR HMM PREPARATION
+            java.io.File modelFile = new java.io.File(@"C:\Users\CharlesCOUSYN\IdeaProjects\TrainingLingPipe\ModelDirectory\model.test");
+            
+            Chunker chunkerHMM = (Chunker)AbstractExternalizable.readObject(modelFile);
+
+            //////////////////////////////////////////
             Console.WriteLine("TextMiningEngine initialization finished");
         }
 
@@ -46,23 +75,7 @@ namespace CrawlerOrphanet
                     );
             List<RelatedEntity> relatedEntities = PredictionData.RelatedEntities.RelatedEntitiesList;
 
-            //Construct dictionnary
-            List<Symptom> phenotypes = symptomsList;
-            TrieDictionary dict = new  TrieDictionary();
-            foreach (Symptom pheno in phenotypes)
-            {
-                dict.addEntry(new com.aliasi.dict.DictionaryEntry(pheno.Name, "PHENOTYPE"));
-                foreach(string synonym in pheno.Synonyms)
-                {
-                    dict.addEntry(new com.aliasi.dict.DictionaryEntry(synonym, "PHENOTYPE"));
-                }
-            }
-
-            TokenizerFactory tokenizerFactory = IndoEuropeanTokenizerFactory.INSTANCE;
-            WeightedEditDistance editDistance = new FixedWeightEditDistance(0, -1, -1, -1, System.Double.NaN);
-
-            double maxDistance = 0.0;
-            ApproxDictionaryChunker chunker = new ApproxDictionaryChunker(dict, tokenizerFactory, editDistance, maxDistance);
+            
 
             List<System.String> texts = new List<System.String>();
 
@@ -73,7 +86,8 @@ namespace CrawlerOrphanet
                 //Text preprocessing
                 text = text.ToLower();
 
-                Chunking chunking = chunker.chunk(text);
+                //NAMED ENTITY RECOGNITION
+                Chunking chunking = chunkerHMM.chunk(text);
                 CharSequence cs = chunking.charSequence();
                 Set chunkSet = chunking.chunkSet();
                 Iterator iterator = chunkSet.iterator();
@@ -92,7 +106,7 @@ namespace CrawlerOrphanet
                     else
                     {
                         //Find infos from phenotypes lists
-                        Symptom symptomFromPhetotypes = phenotypes.Where(x => x.Name.Equals(str) || x.Synonyms.IndexOf(str) != -1).FirstOrDefault() ;
+                        Symptom symptomFromPhetotypes = symptomsList.Where(x => x.Name.Equals(str) || x.Synonyms.IndexOf(str) != -1).FirstOrDefault() ;
 
                         //Add the real Symptom
                         relatedEntities.Add(
