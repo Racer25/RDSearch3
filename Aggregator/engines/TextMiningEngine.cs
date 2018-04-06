@@ -27,6 +27,7 @@ namespace CrawlerOrphanet
         private List<Symptom> symptomsList;
         private HttpClient client;
         private ApproxDictionaryChunker chunker;
+        private Chunker chunkerHMM;
 
         public TextMiningEngine()
         {
@@ -58,7 +59,7 @@ namespace CrawlerOrphanet
             //FOR HMM PREPARATION
             java.io.File modelFile = new java.io.File($"{Environment.GetEnvironmentVariable("RD_AGGREGATOR_SETTINGS")}/Aggregator/tools/model.test");
             
-            Chunker chunkerHMM = (Chunker)AbstractExternalizable.readObject(modelFile);
+            chunkerHMM = (Chunker)AbstractExternalizable.readObject(modelFile);
 
             //////////////////////////////////////////
             Console.WriteLine("TextMiningEngine initialization finished");
